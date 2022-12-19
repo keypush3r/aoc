@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TupleSections #-}
 module Y2022.AOC19 where
 
 import qualified Data.Map as M
@@ -43,7 +44,7 @@ run1 fileName =
         --     Nothing -> putStrLn "boo"
 
 
-collectionDuration = 24
+
 
 {-
 boo g = filterTrees (\(S t acc a) -> maybe True (acc >=) $ M.lookup t mileStoneCriterias) res0
