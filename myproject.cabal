@@ -1,0 +1,16 @@
+name:            myproject
+version:         0.1
+synopsis:        Package with library and two programs
+license:         BSD3
+author:          KW
+build-type:      Simple
+cabal-version:   >= 1.8
+
+library
+  build-depends:
+  hs-source-dirs:  src/
+  exposed-modules:
+  build-depends:
+    base >= 4 && < 5,
+    containers,
+    safe
