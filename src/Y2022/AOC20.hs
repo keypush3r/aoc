@@ -20,17 +20,28 @@ import qualified Data.Char as Char
 
 run1 :: String -> IO ()
 run1 fileName =
-    withGrid fileName $ \g -> let
-        res = mix (L.length g) g
+    withInput fileName $ \g -> let
+        res = mix1 (L.length g) g
         nums = findNumsAfterZero [1000, 2000, 3000] res
         in do
           putStrLn $ "mix " ++ (show $ res)
           putStrLn $ "res " ++ (show $ nums)
           putStrLn $ "sum " ++ (show $ foldr (+) 0 nums)
-        -- res1 = boo g
-        -- in case findBestChildren (S 0 0 (Move "AA")) res1 of
-        --     Just res ->  putStrLn $ show $ fmap (drop 1) res  -- ++ show covered
-        --     Nothing -> putStrLn "boo"
+
+
+run2 :: String -> IO ()
+run2 fileName =
+    withInput fileName $ \g -> let
+        gg = fmap (*811589153) g
+        res = let
+          size = (L.length g)
+          in foldl (\t e -> mix2 size t gg) gg [1..10]
+        nums = findNumsAfterZero [1000, 2000, 3000] res
+        in do
+          putStrLn $ "inp " ++ (show $ gg)
+          putStrLn $ "mix " ++ (show $ res)
+          putStrLn $ "res " ++ (show $ nums)
+          putStrLn $ "sum " ++ (show $ foldr (+) 0 nums)
 
 
 findNumsAfterZero :: [Int] -> [Int] -> [Int]
@@ -41,37 +52,30 @@ findNumsAfterZero ns worked = let
   in fmap (worked !! ) $ traceShowId $ fmap (findNth . (+(zeroPos))) ns
 
 
--- <a|b|c|d|e|f|
-
--- posEval size newPosVirt = let
---   newPosTmp = mod (newPosVirt) size
---   in 1 + mod (newPosTmp - 1) (size - 1)  -- if newPosTmp == 0 then size - 1 else newPosTmp
-{-
-   a b c a
-   c     b
-   b     c
-   a c b a
--}
---posEval size newPosVirt =
---  case mod (((signum newPosVirt) * (signum (div newPosVirt size)) + newPosVirt) size of
---    0 -> size - 1
---    x -> x
-
-posEval size newPosVirt = 1 + mod (newPosVirt-1) (size -1)
+posEval size newPosVirt = 1 + mod (newPosVirt-1) (size - 1)
 
 
+mix2 :: Int -> [Int] -> [Int] -> [Int]
+mix2 maxMoves inp originalOrder = let
+  size = length originalOrder
+  movePos _  worked [] = worked
+  movePos movesDone worked (num : xs)
+    | movesDone < maxMoves = let
+        Just pos = L.elemIndex num originalOrder
+        newPos = posEval size $ pos + num
+        in movePos (movesDone + 1) (move pos newPos id worked) xs
+    | otherwise = worked
+  in movePos 0 inp originalOrder
 
-mix :: Int -> [Int] -> [Int]
-mix maxMoves inp = let
+
+mix1 :: Int -> [Int] -> [Int]
+mix1 maxMoves inp = let
   lifted = fmap Left inp
   size = length lifted
   movePos movesDone worked
     | movesDone < maxMoves =
       case filter (isLeft . snd) $ zip [0..] worked of
         (pos, Left num) : xs -> let
-          --newPos = case traceShowId $  if num /= 0 then mod (traceShowId $ pos + num) size else pos of
-          --            0 -> size -1
-          --            x -> x
           newPos = traceShowId $ posEval size $ pos + num
           in movePos (movesDone + 1) $ move pos newPos (\(Left x) -> Right x) worked
         []  ->  worked
@@ -93,17 +97,15 @@ move old new f worked
     where size = L.length worked
 
 
-withGrid :: String -> ([Int] -> IO ()) -> IO ()
-withGrid fileName f = do
+withInput :: String -> ([Int] -> IO ()) -> IO ()
+withInput fileName f = do
     inp <- readFile fileName
     case parseInput inp of
-      Just bluePrints -> let
-        -- props = M.fromList $ fmap (\v -> (valveLabel v, v)) valves
+      Just res -> let
         in do
-            putStrLn $ "input :" ++ show bluePrints
-                    -- putStrLn $ "valves : " ++ show valves
+            putStrLn $ "input :" ++ show res
             putStrLn ""
-            f bluePrints
+            f res
       Nothing -> return ()
 
 
