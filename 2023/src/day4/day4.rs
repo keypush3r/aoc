@@ -18,19 +18,19 @@ struct Card {
 
 fn main() {
 	
-	let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     
-	let file_path = &args[1];
+    let file_path = &args[1];
          
-	println!("In file {}", file_path);
+    println!("In file {}", file_path);
 
-	let contents = fs::read_to_string(file_path)
+    let contents = fs::read_to_string(file_path)
         .expect("Should have been able to read the file");
 
-  	println!("With text:\n{}", contents);
-	let cards : Vec<Card> = contents.lines().enumerate().try_fold(
-		Vec::new(),
-		|mut tot, (idx, line)| readCard(idx, line).map(|card| { tot.push(card); tot } )
+    println!("With text:\n{}", contents);
+    let cards : Vec<Card> = contents.lines().enumerate().try_fold(
+        Vec::new(),
+        |mut tot, (idx, line)| readCard(idx, line).map(|card| { tot.push(card); tot } )
 	).expect("boo");
 	
     let score : u32 = cards.iter().fold(0, |mut tot, card| tot + evaluateCard(card));
@@ -44,15 +44,15 @@ fn main() {
 
 fn numWonCards(cardsToEval: &Vec<&Card>, available: &Vec<&Card>) -> usize {
     if(cardsToEval.len() > 0) {
-        let wonCards : Vec<&Card>  = cardsToEval.iter().flat_map(|card| scoreCards(card, available)).collect();     
-        println!("pass {:?}", cardsToEval.iter().map(|x| x.index).collect::<Vec<usize>>());
+        let wonCards : Vec<&Card>  = cardsToEval.iter().flat_map(|card| cardReward(card, available)).collect();     
+        //println!("pass {:?}", cardsToEval.iter().map(|x| x.index).collect::<Vec<usize>>());
         cardsToEval.len() + numWonCards(&wonCards, available)
     } else {
         0
     }
 }
 
-fn scoreCards<'a>(card : &Card, available: &'a Vec<&Card>) -> Vec<&'a Card> {
+fn cardReward<'a>(card : &Card, available: &'a Vec<&Card>) -> Vec<&'a Card> {
     let score = evaluateCardNumWinningNumbers(card) as usize;
     if score > 0 {
         let cardsWonHyp = (card.index + 1)..(card.index + score + 1);
@@ -110,4 +110,3 @@ fn parseCard(input : &str) -> IResult<&str, (Vec<&str>, Vec<&str>)> {
 fn readNums(numStrs: Vec<&str>) -> Option<Vec<u8>> {    
     numStrs.iter().map(|x| u8::from_str(x).ok()).collect()
 }
-
