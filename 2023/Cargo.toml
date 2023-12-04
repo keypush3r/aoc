@@ -23,7 +23,7 @@ path = "src/day1/day1_part2.rs"
 
 
 [[bin]]
-name = "Day4_1"
+name = "day4_1"
 test = false
 bench = false
 path = "src/day4/day4_1.rs"

@@ -11,6 +11,7 @@ use nom::multi::{separated_list1, many1};
 
 #[derive(Debug)]
 struct Card {
+    index : usize,
     winning : Vec<u8>,
     received : Vec<u8>
 }
@@ -27,31 +28,63 @@ fn main() {
         .expect("Should have been able to read the file");
 
   	println!("With text:\n{}", contents);
-	let res : Vec<Card> = contents.lines().try_fold(
+	let cards : Vec<Card> = contents.lines().enumerate().try_fold(
 		Vec::new(),
-		|mut tot, line| readCard(line).map(|card| { tot.push(card); tot } )
+		|mut tot, (idx, line)| readCard(idx, line).map(|card| { tot.push(card); tot } )
 	).expect("boo");
 	
-    let score : u32 = res.iter().fold(0, |mut tot, card| tot + evaluateCard(card));
+    let score : u32 = cards.iter().fold(0, |mut tot, card| tot + evaluateCard(card));
 
+    let cards2 = cards.iter().map(|x| x).collect();
 
-	print!("Result {:?}", score);
+    let numOfCards = numWonCards(&cards2, &cards2);
+
+    print!("Result part1: {:?}, part2 {:?}", score, numOfCards);
 }
 
+fn numWonCards(cardsToEval: &Vec<&Card>, available: &Vec<&Card>) -> usize {
+    if(cardsToEval.len() > 0) {
+        let wonCards : Vec<&Card>  = cardsToEval.iter().flat_map(|card| scoreCards(card, available)).collect();     
+        println!("pass {:?}", cardsToEval.iter().map(|x| x.index).collect::<Vec<usize>>());
+        cardsToEval.len() + numWonCards(&wonCards, available)
+    } else {
+        0
+    }
+}
+
+fn scoreCards<'a>(card : &Card, available: &'a Vec<&Card>) -> Vec<&'a Card> {
+    let score = evaluateCardNumWinningNumbers(card) as usize;
+    if score > 0 {
+        let cardsWonHyp = (card.index + 1)..(card.index + score + 1);
+        let cardsWon = cardsWonHyp.filter(|&x| x < available.len()).collect::<Vec<usize>>();
+        //println!("Card {} wins {:?}", card.index, cardsWon);
+        cardsWon.iter().map(|x| *available.get(*x).unwrap()).collect()
+    } else {
+        Vec::new()
+    }
+}
+
+
 fn evaluateCard(card: &Card) -> u32 {
-    let found= card.received.iter().filter(|x| card.winning.contains(&x)).collect::<Vec<&u8>>().len() as u32;
+    let found = evaluateCardNumWinningNumbers(card);
     
     let res = if found > 0 { 2u32.pow(found - 1) } else { 0 };
-    println!("{} {}", found, res);
+    //println!("{} {}", found, res);
     res
 }
 
-fn readCard(input : &str) -> Option<Card> {
+fn evaluateCardNumWinningNumbers(card: &Card) -> u32 {
+    card.received.iter().filter(|x| card.winning.contains(&x)).collect::<Vec<&u8>>().len() as u32
+}
+    
+
+
+fn readCard(index : usize, input : &str) -> Option<Card> {
     match parseCard(input) {
         Ok((_, (winningStr, receivedStr))) => 
             readNums(winningStr)
                 .and_then(|winning| readNums(receivedStr)
-                    .map(|received| Card { winning: winning, received: received })
+                    .map(|received| Card { index: index, winning: winning, received: received })
                 ),
         Err(e) => {
             println!("Bad {:?}", e);
