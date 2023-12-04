@@ -20,3 +20,11 @@ name = "day1_2"
 test = false
 bench = false
 path = "src/day1/day1_part2.rs"
+
+
+[[bin]]
+name = "Day4_1"
+test = false
+bench = false
+path = "src/day4/day4_1.rs"
+
