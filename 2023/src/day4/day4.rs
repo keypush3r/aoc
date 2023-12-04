@@ -35,14 +35,14 @@ fn main() {
 	
     let score : u32 = cards.iter().fold(0, |mut tot, card| tot + evaluateCard(card));
 
-    let cards2 = cards.iter().map(|x| x).collect();
+    let cards2 = &cards.iter().map(|x| x).collect();
 
-    let numOfCards = numWonCards(&cards2, &cards2);
+    let numOfCards = numWonCards(&cards2, &cards);
 
     print!("Result part1: {:?}, part2 {:?}", score, numOfCards);
 }
 
-fn numWonCards(cardsToEval: &Vec<&Card>, available: &Vec<&Card>) -> usize {
+fn numWonCards(cardsToEval: &Vec<&Card>, available: &Vec<Card>) -> usize {
     if(cardsToEval.len() > 0) {
         let wonCards : Vec<&Card>  = cardsToEval.iter().flat_map(|card| cardReward(card, available)).collect();     
         //println!("pass {:?}", cardsToEval.iter().map(|x| x.index).collect::<Vec<usize>>());
@@ -52,13 +52,13 @@ fn numWonCards(cardsToEval: &Vec<&Card>, available: &Vec<&Card>) -> usize {
     }
 }
 
-fn cardReward<'a>(card : &Card, available: &'a Vec<&Card>) -> Vec<&'a Card> {
+fn cardReward<'a>(card : &Card, available: &'a Vec<Card>) -> Vec<&'a Card> {
     let score = evaluateCardNumWinningNumbers(card) as usize;
     if score > 0 {
         let cardsWonHyp = (card.index + 1)..(card.index + score + 1);
         let cardsWon = cardsWonHyp.filter(|&x| x < available.len()).collect::<Vec<usize>>();
         //println!("Card {} wins {:?}", card.index, cardsWon);
-        cardsWon.iter().map(|x| *available.get(*x).unwrap()).collect()
+        cardsWon.iter().map(|x| available.get(*x).unwrap()).collect()
     } else {
         Vec::new()
     }

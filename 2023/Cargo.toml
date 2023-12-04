@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 nom = "6.0.0"
+ranges = "0.3.3"
 
 [[bin]]
 name = "day1"
@@ -23,8 +24,14 @@ path = "src/day1/day1_part2.rs"
 
 
 [[bin]]
-name = "day4_1"
+name = "day4"
 test = false
 bench = false
-path = "src/day4/day4_1.rs"
+path = "src/day4/day4.rs"
+
+[[bin]]
+name = "day5"
+test = false
+bench = false
+path = "src/day5/day5.rs"
 
